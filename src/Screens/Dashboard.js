@@ -8,10 +8,9 @@ import {
   Stethoscope,
   Save,
 } from "lucide-react";
-import { jsPDF } from "jspdf"; // Import jsPDF
+import { jsPDF } from "jspdf";
 
 const Dashboard = () => {
-  // Color Palette
   const colors = {
     tealBlue: "#008080",
     lightBlue: "#4FACB4",
@@ -20,7 +19,6 @@ const Dashboard = () => {
     textGray: "#4A4A4A",
   };
 
-  // Styles Object
   const styles = {
     container: {
       display: "flex",
@@ -56,7 +54,6 @@ const Dashboard = () => {
       padding: "10px",
       borderRadius: "8px",
       background: "transparent",
-      color: colors.white,
       border: "none",
       cursor: "pointer",
       transition: "background-color 0.3s ease",
@@ -82,26 +79,26 @@ const Dashboard = () => {
       alignItems: "center",
       marginBottom: "20px",
     },
-    formGrid: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: "20px",
-      marginBottom: "20px",
+    table: {
+      width: "100%",
+      borderCollapse: "collapse",
+      marginTop: "20px",
     },
-    inputContainer: {
-      display: "flex",
-      flexDirection: "column",
+    tableHeader: {
+      backgroundColor: colors.tealBlue,
+      color: colors.white,
+      textAlign: "left",
     },
-    inputLabel: {
-      marginBottom: "8px",
-      fontSize: "14px",
-      color: colors.textGray,
-    },
-    inputField: {
+    tableCell: {
       padding: "10px",
-      border: "1px solid #E0E0E0",
+      border: "1px solid #ddd",
+    },
+    searchInput: {
+      width: "100%",
+      padding: "10px",
+      marginBottom: "20px",
       borderRadius: "8px",
-      fontSize: "16px",
+      border: "1px solid #ddd",
     },
     submitButton: {
       backgroundColor: colors.tealBlue,
@@ -113,7 +110,45 @@ const Dashboard = () => {
       alignItems: "center",
       cursor: "pointer",
       transition: "background-color 0.3s ease",
-    },
+    },formContainer: {
+      backgroundColor: colors.white,
+      borderRadius: "12px",
+      padding: "30px",
+      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    },formTitle: {
+      fontSize: "24px",
+      color: colors.tealBlue,
+      display: "flex",
+      alignItems: "center",
+      marginBottom: "20px",
+    },formGrid: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "20px",
+      marginBottom: "20px",
+    },inputContainer: {
+      display: "flex",
+      flexDirection: "column",
+    },inputLabel: {
+      marginBottom: "8px",
+      fontSize: "14px",
+      color: colors.textGray,
+    },inputField: {
+      padding: "10px",
+      border: "1px solid #E0E0E0",
+      borderRadius: "8px",
+      fontSize: "16px",
+    },submitButton: {
+      backgroundColor: colors.tealBlue,
+      color: colors.white,
+      padding: "12px 20px",
+      border: "none",
+      borderRadius: "8px",
+      display: "flex",
+      alignItems: "center",
+      cursor: "pointer",
+      transition: "background-color 0.3s ease",
+    }
   };
 
   const [activeSection, setActiveSection] = useState("new-patient");
@@ -124,6 +159,25 @@ const Dashboard = () => {
     diagnosis: "",
     prescription: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const dummyPatients = [
+    { id: 1, name: "John Doe", age: 34, date: "2024-12-01", diagnosis: "Flu" },
+    {
+      id: 2,
+      name: "Jane Smith",
+      age: 29,
+      date: "2024-12-05",
+      diagnosis: "Cough",
+    },
+    {
+      id: 3,
+      name: "Alice Johnson",
+      age: 42,
+      date: "2024-12-03",
+      diagnosis: "Allergy",
+    },
+  ];
 
   const sidebarMenuItems = [
     { icon: Users, label: "Patient List", section: "patient-list" },
@@ -143,64 +197,66 @@ const Dashboard = () => {
 
   const handleSubmitPatient = (e) => {
     e.preventDefault();
-
-    // Create PDF document using jsPDF
     const doc = new jsPDF();
-
-    // Set title font and color
     doc.setFontSize(20);
     doc.setTextColor(255, 255, 255);
-    doc.setFillColor(0, 128, 128); // Teal Blue
-    doc.rect(0, 0, 210, 30, "F"); // Draw a rectangle at the top for the header
+    doc.setFillColor(0, 128, 128);
+    doc.rect(0, 0, 210, 30, "F");
     doc.text("Patient Registration Report", 15, 20);
 
-    // Add spacing between sections
     const lineHeight = 10;
-    let verticalPosition = 40; // Start from this vertical position
-
-    // Set font for details
+    let verticalPosition = 40;
     doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0); // Black color for text
+    doc.setTextColor(0, 0, 0);
 
-    // Patient Details Section
     doc.text(`Name: ${patientForm.name}`, 15, verticalPosition);
     verticalPosition += lineHeight;
-
     doc.text(`Date: ${patientForm.date}`, 15, verticalPosition);
     verticalPosition += lineHeight;
-
     doc.text(`Age: ${patientForm.age}`, 15, verticalPosition);
     verticalPosition += lineHeight;
-
-    doc.text(`Diagnosis:`, 15, verticalPosition);
+    doc.text("Diagnosis:", 15, verticalPosition);
     verticalPosition += lineHeight;
     doc.setFontSize(12);
     doc.text(patientForm.diagnosis, 15, verticalPosition, { maxWidth: 180 });
-    verticalPosition += 40; // Add more spacing after diagnosis
+    verticalPosition += 40;
 
     doc.setFontSize(14);
-    doc.text(`Prescription:`, 15, verticalPosition);
+    doc.text("Prescription:", 15, verticalPosition);
     verticalPosition += lineHeight;
     doc.setFontSize(12);
     doc.text(patientForm.prescription, 15, verticalPosition, { maxWidth: 180 });
 
-    // Add a footer with a light gray background
-    doc.setFillColor(240, 240, 240); // Light gray
-    doc.rect(0, 280, 210, 20, "F"); // Light gray footer
-    doc.setTextColor(100, 100, 100); // Darker gray for footer text
+    doc.setFillColor(240, 240, 240);
+    doc.rect(0, 280, 210, 20, "F");
+    doc.setTextColor(100, 100, 100);
     doc.setFontSize(10);
     doc.text("MediTrack - Patient Report System", 15, 290);
 
-    // Save the PDF
     doc.save(`${patientForm.name}_patient_report.pdf`);
-
-    console.log("Patient Data Submitted:", patientForm);
     alert("Patient Record Created and PDF Generated!");
+  };
+
+  const filteredPatients = dummyPatients.filter((patient) =>
+    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const handleViewPatient = (id) => {
+    console.log("Viewing patient with ID:", id);
+    // Implement your logic to view patient details
+  };
+
+  const handleEditPatient = (id) => {
+    console.log("Editing patient with ID:", id);
+    // Implement your logic to edit patient details
+  };
+
+  const handleDeletePatient = (id) => {
+    console.log("Deleting patient with ID:", id);
+    // Implement your logic to delete patient details
   };
 
   return (
     <div style={styles.container}>
-      {/* Sidebar */}
       <div style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
           <Stethoscope size={40} color="white" />
@@ -226,9 +282,37 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div style={styles.mainContent}>
-        {activeSection === "new-patient" && (
+        {activeSection === "patient-list" && (
+          <div style={styles.formContainer}>
+            <h2 style={styles.formTitle}>Patient List</h2>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableCell}>ID</th>
+                  <th style={styles.tableCell}>Name</th>
+                  <th style={styles.tableCell}>Age</th>
+                  <th style={styles.tableCell}>Date</th>
+                  <th style={styles.tableCell}>Diagnosis</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dummyPatients.map((patient) => (
+                  <tr key={patient.id}>
+                    <td style={styles.tableCell}>{patient.id}</td>
+                    <td style={styles.tableCell}>{patient.name}</td>
+                    <td style={styles.tableCell}>{patient.age}</td>
+                    <td style={styles.tableCell}>{patient.date}</td>
+                    <td style={styles.tableCell}>{patient.diagnosis}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+<div style={styles.mainContent}>
+         {activeSection === "new-patient" && (
           <div style={styles.formContainer}>
             <div style={styles.formTitle}>
               <UserPlus style={{ marginRight: "10px" }} />
@@ -320,8 +404,73 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+        {activeSection === "search-patient" && (
+          <div style={styles.formContainer}>
+            <h2 style={styles.formTitle}>Search Patient</h2>
+            <input
+              style={styles.searchInput}
+              type="text"
+              placeholder="Search by name"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>Name</th>
+                  <th style={styles.tableHeader}>Age</th>
+                  <th style={styles.tableHeader}>Gender</th>
+                  <th style={styles.tableHeader}>Condition</th>
+                  <th style={styles.tableHeader}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dummyPatients
+                  .filter((patient) =>
+                    patient.name
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
+                  )
+                  .map((patient) => (
+                    <tr key={patient.id} style={styles.tableRow}>
+                      <td style={styles.tableCell}>{patient.name}</td>
+                      <td style={styles.tableCell}>{patient.age}</td>
+                      <td style={styles.tableCell}>{patient.gender}</td>
+                      <td style={styles.tableCell}>{patient.condition}</td>
+                      <td style={styles.tableCell}>
+                        <button
+                          style={styles.actionButton}
+                          onClick={() => handleViewPatient(patient.id)}
+                        >
+                          View
+                        </button>
+                        <button
+                          style={styles.actionButton}
+                          onClick={() => handleEditPatient(patient.id)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          style={styles.deleteButton}
+                          onClick={() => handleDeletePatient(patient.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            {dummyPatients.filter((patient) =>
+              patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+            ).length === 0 && (
+              <p style={styles.noResults}>No patients found.</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
 export default Dashboard;
