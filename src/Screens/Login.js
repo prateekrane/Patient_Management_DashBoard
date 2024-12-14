@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, User, AlertCircle, HeartPulse } from "lucide-react";
 
 const VALID_CREDENTIALS = {
-  username: "doctor123",
+  username: "Dr. Neeraj Choudhary",
   password: "MedicalPro2024!",
 };
 
@@ -15,9 +15,32 @@ const LoginPage = () => {
 
   //   const navigate = useNavigate(); // Hook from React Router to handle navigation
 
-  const handleClick = () => {
-    window.location.href = "/dashboard"; // Navigates to the '/dashboard' route
-  };
+  
+
+  useEffect(() => {
+    // Disable browser's default navigation buttons
+    const handleNavigation = (event) => {
+      event.preventDefault();
+      window.history.pushState(null, document.title, window.location.href);
+    };
+
+    // Block browser back/forward buttons
+    window.history.pushState(null, document.title, window.location.href);
+    window.addEventListener('popstate', handleNavigation);
+
+    // Disable browser back/forward buttons
+    window.addEventListener('beforeunload', (event) => {
+      // Cancel the event
+      event.preventDefault();
+      // Chrome requires returnValue to be set
+      event.returnValue = '';
+    });
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener('popstate', handleNavigation);
+    };
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -26,10 +49,52 @@ const LoginPage = () => {
       username === VALID_CREDENTIALS.username &&
       password === VALID_CREDENTIALS.password
     ) {
+      // Create a session with an expiration time (e.g., 1 hour from now)
+      const session = {
+        username: username,
+        expiresAt: Date.now() + 60 * 60 * 1000, // 1 hour
+        token: generateSessionToken()
+      };
+
+      // Store session in localStorage
+      localStorage.setItem('userSession', JSON.stringify(session));
+
       setIsAuthenticated(true);
       setError("");
     } else {
       setError("Invalid credentials");
+    }
+  };
+
+  // Simple session token generation
+  const generateSessionToken = () => {
+    return Math.random().toString(36).substring(2, 15) + 
+           Math.random().toString(36).substring(2, 15);
+  };
+
+  const handleLogout = () => {
+    // Remove session from localStorage
+    localStorage.removeItem('userSession');
+    
+    // Reset authentication state
+    setIsAuthenticated(false);
+    setUsername("");
+    setPassword("");
+  };
+
+  const handleClick = () => {
+    const storedSession = localStorage.getItem('userSession');
+    if (storedSession) {
+      const sessionData = JSON.parse(storedSession);
+      if (sessionData.expiresAt > Date.now()) {
+        // Use window.history.replaceState to prevent adding to browser history
+        window.history.replaceState(null, '', '/dashboard');
+        // Programmatic navigation without adding to history
+        window.location.replace('/dashboard');
+      } else {
+        // Session expired, force logout
+        handleLogout();
+      }
     }
   };
 
@@ -79,28 +144,47 @@ const LoginPage = () => {
               margin: "16px 0",
             }}
           >
-            Welcome, Dr. {username}
+            Welcome, {username}
           </h2>
           <p style={{ color: "#4A5568", marginBottom: "24px" }}>
             You are now logged in to the medical dashboard
           </p>
-          <motion.button
-            onClick={handleClick} // Trigger navigation on click
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              background: "linear-gradient(to right, #008080, #87CEEB)",
-              color: "white",
-              padding: "12px 24px",
-              borderRadius: "50px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-              transition: "background 0.3s",
-            }}
-          >
-            Enter Dashboard
-          </motion.button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+            <motion.button
+              onClick={handleClick}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                background: "linear-gradient(to right, #008080, #87CEEB)",
+                color: "white",
+                padding: "12px 24px",
+                borderRadius: "50px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "bold",
+                transition: "background 0.3s",
+              }}
+            >
+              Enter Dashboard
+            </motion.button>
+            <motion.button
+              onClick={handleLogout}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                background: "linear-gradient(to right, #E53E3E, #FFA07A)",
+                color: "white",
+                padding: "12px 24px",
+                borderRadius: "50px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "bold",
+                transition: "background 0.3s",
+              }}
+            >
+              Logout
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     );
