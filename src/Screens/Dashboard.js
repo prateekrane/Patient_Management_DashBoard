@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import axios from 'axios';
+import PatientList from "./PatientList";
 
 const Dashboard = () => {
   const colors = {
@@ -21,12 +22,18 @@ const Dashboard = () => {
   };
 
   const styles = {
+    container: {
+      display: "flex",
+      flexDirection: "row",
+      gap: "10px"
+    },
     sidebar: {
       width: "250px",
       background: `linear-gradient(to bottom, ${colors.tealBlue}, ${colors.lightBlue})`,
       padding: "20px",
       color: colors.white,
       boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+      height: "150vh"
     },
     sidebarHeader: {
       display: "flex",
@@ -145,6 +152,18 @@ const Dashboard = () => {
       alignItems: "center",
       cursor: "pointer",
       transition: "background-color 0.3s ease",
+    },
+    submitPrescriptionButton: {
+      backgroundColor: colors.tealBlue,
+      color: colors.white,
+      padding: "12px 20px",
+      border: "none",
+      borderRadius: "8px",
+      display: "flex",
+      alignItems: "center",
+      cursor: "pointer",
+      transition: "background-color 0.3s ease",
+      marginRight: "12px"
     }
   };
 
@@ -158,23 +177,23 @@ const Dashboard = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  const dummyPatients = [
-    { id: 1, name: "John Doe", age: 34, date: "2024-12-01", diagnosis: "Flu" },
-    {
-      id: 2,
-      name: "Jane Smith",
-      age: 29,
-      date: "2024-12-05",
-      diagnosis: "Cough",
-    },
-    {
-      id: 3,
-      name: "Alice Johnson",
-      age: 42,
-      date: "2024-12-03",
-      diagnosis: "Allergy",
-    },
-  ];
+  // const dummyPatients = [
+  //   { id: 1, name: "John Doe", age: 34, date: "2024-12-01", diagnosis: "Flu" },
+  //   {
+  //     id: 2,
+  //     name: "Jane Smith",
+  //     age: 29,
+  //     date: "2024-12-05",
+  //     diagnosis: "Cough",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Alice Johnson",
+  //     age: 42,
+  //     date: "2024-12-03",
+  //     diagnosis: "Allergy",
+  //   },
+  // ];
 
   const sidebarMenuItems = [
     { icon: Users, label: "Patient List", section: "patient-list" },
@@ -272,6 +291,7 @@ const handleSubmitPatient = async (e) => {
     // Prepare the patient data for API submission
     const patientData = {
         id: patientForm.patientId,
+        patient_id: patientForm.patientId,
         name: patientForm.name,
         age: parseInt(patientForm.age),
         gender: patientForm.gender,
@@ -378,9 +398,9 @@ const handleSubmitPatient = async (e) => {
 
   
 
-  const filteredPatients = dummyPatients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredPatients = dummyPatients.filter((patient) =>
+  //   patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
   const handleViewPatient = (id) => {
     console.log("Viewing patient with ID:", id);
     // Implement your logic to view patient details
@@ -424,33 +444,7 @@ const handleSubmitPatient = async (e) => {
       </div>
 
       <div style={styles.mainContent}>
-        {activeSection === "patient-list" && (
-          <div style={styles.formContainer}>
-            <h2 style={styles.formTitle}>Patient List</h2>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.tableCell}>ID</th>
-                  <th style={styles.tableCell}>Name</th>
-                  <th style={styles.tableCell}>Age</th>
-                  <th style={styles.tableCell}>Date</th>
-                  <th style={styles.tableCell}>Diagnosis</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dummyPatients.map((patient) => (
-                  <tr key={patient.id}>
-                    <td style={styles.tableCell}>{patient.id}</td>
-                    <td style={styles.tableCell}>{patient.name}</td>
-                    <td style={styles.tableCell}>{patient.age}</td>
-                    <td style={styles.tableCell}>{patient.date}</td>
-                    <td style={styles.tableCell}>{patient.diagnosis}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {activeSection === "patient-list" && ( <PatientList/> )}
 
 <div style={styles.mainContent}>
          {activeSection === "new-patient" && (
@@ -566,9 +560,17 @@ const handleSubmitPatient = async (e) => {
       marginTop: "20px",
     }}
   >
+    <button type="submit" style={styles.submitPrescriptionButton}>
+      <Save style={{ marginRight: "10px" }} /> Upload Prescription
+    </button>
+
+
     <button type="submit" style={styles.submitButton}>
       <Save style={{ marginRight: "10px" }} /> Save Patient Record
     </button>
+
+
+    
   </div>
 </form>
           </div>
@@ -596,7 +598,7 @@ const handleSubmitPatient = async (e) => {
                 </tr>
               </thead>
               <tbody>
-                {dummyPatients
+                {/* {dummyPatients
                   .filter((patient) =>
                     patient.name
                       .toLowerCase()
@@ -629,14 +631,14 @@ const handleSubmitPatient = async (e) => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))} */}
               </tbody>
             </table>
-            {dummyPatients.filter((patient) =>
+            {/* {dummyPatients.filter((patient) =>
               patient.name.toLowerCase().includes(searchTerm.toLowerCase())
             ).length === 0 && (
               <p style={styles.noResults}>No patients found.</p>
-            )}
+            )} */}
           </div>
         )}
       </div>
